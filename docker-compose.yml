@@ -1,0 +1,45 @@
+# docker当前对应的Compose版本
+version: '3'
+# 容器组
+services:
+  # 镜像容器服务标识
+  nginx:
+    container_name: zx-nginx
+    # 指定构建镜像上下文的目录，“.”当前目录
+    image: nginx:1.18.0
+    # 映射容器的端口
+    ports:
+      - "8080:80"
+    volumes:
+      - "${BASE_DIR}/www:/www"
+      - "${BASE_DIR}/nginx:/etc/nginx"
+  php:
+    container_name: zx-php
+    image: zxchobits/zx-php:redis
+#    build:                           # 构建自定义镜像
+#      context: .                   # 指定Dockerfile文件所在路径
+#      dockerfile: Dockerfile         # 指定Dockerfile文件名称
+    ports:
+      - "9000:9000"
+    volumes:
+      - "${BASE_DIR}/www:/www"
+      - "${BASE_DIR}/php:/usr/local/etc/php"
+    links:
+      - mysql
+      - redis
+  mysql:
+    container_name: zx-mysql
+    image: mysql:5.7.33
+    ports:
+      - "33066:3306"
+    environment:
+      # 必须设置密码，否在容器启动失败
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "TZ=Asia/Shanghai"
+    volumes:
+      #      数据库还原目录 可将需要还原的sql文件放在这里
+      - ${BASE_DIR}/mysql/source:/var/lib/mysql
+  redis:
+    container_name: zx-redis
+    image: redis:6.0.10
+
